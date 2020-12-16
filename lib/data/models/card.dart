@@ -6,6 +6,7 @@ class CardData extends Equatable {
   CardData({
     @required this.name,
     @required this.about,
+    @required this.id,
   });
 
   factory CardData.fromMap(DocumentSnapshot documentSnapshot) {
@@ -13,11 +14,13 @@ class CardData extends Equatable {
     return CardData(
       name: data['name'],
       about: data['about'],
+      id: data['id'],
     );
   }
 
   final String name;
   final String about;
+  final int id;
 
   @override
   List<Object> get props => [name, about];

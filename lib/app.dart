@@ -75,7 +75,7 @@ class AppView extends StatelessWidget {
 }
 
 class CardWidget extends StatelessWidget {
-  const CardWidget({Key key}) : super(key: key);
+  const CardWidget({Key key, @required this.cardData}) : super(key: key);
 
   static Widget route({@required CardData cardData}) {
     return BlocProvider(
@@ -83,24 +83,43 @@ class CardWidget extends StatelessWidget {
         ..add(
           CardOpen(cardData: cardData),
         ),
-      child: const CardWidget(),
+      child: CardWidget(
+        cardData: cardData,
+      ),
     );
   }
 
+  final CardData cardData;
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CardBloc, CardState>(
-      buildWhen: (previous, current) => previous != current,
-      builder: (context, state) {
-        if (state is CardOpened) {
-          return ListTile(
-            title: Text('${state.cardData.name}'),
-            subtitle: Text('${state.cardData.about}'),
-          );
-        } else {
-          return const CircularProgressIndicator();
+    return BlocListener<HomePageBloc, HomePageState>(
+      listener: (context, state) {
+        if (state is HomePageUpdated) {
+          state.cardList.singleWhere((element) => element.id == cardData.id) !=
+                  cardData
+              ? context.read<CardBloc>().add(
+                    CardOpen(
+                      cardData: state.cardList
+                          .singleWhere((element) => element.id == cardData.id),
+                    ),
+                  )
+              // ignore: avoid_print
+              : print('No Changes in ${cardData.id}');
         }
       },
+      child: BlocBuilder<CardBloc, CardState>(
+        builder: (context, state) {
+          if (state is CardOpened) {
+            return ListTile(
+              title: Text('${state.cardData.name}'),
+              subtitle: Text('${state.cardData.about}'),
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        },
+      ),
     );
   }
 }
